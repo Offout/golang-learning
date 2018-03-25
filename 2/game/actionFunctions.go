@@ -62,6 +62,12 @@ func move(command playerCommand) (reply string) {
 		return "нет пути в " + command.arg1
 	}
 
+	for _, v := range doors {
+		if (moveTo.name == v.to.name) && (player.place.name == v.from.name) && v.locked {
+			return "дверь закрыта"
+		}
+	}
+
 	if moveTo.name == placeNameOutside {
 		return "на улице весна. можно пройти - домой"
 	}
@@ -100,10 +106,10 @@ func take(command playerCommand) (reply string) {
 	} else {
 		successfullyTaken := false
 
-		for _, val := range player.equipped {
+		for idx, val := range player.equipped {
 			if val.name != "" {
 				successfullyTaken = true
-				val.containing = append(val.containing, toTake)
+				player.equipped[idx].containing = append(val.containing, toTake)
 				player.place.containing = append(player.place.containing[:deleteIndex], player.place.containing[deleteIndex+1:]...)
 			}
 		}
@@ -143,7 +149,38 @@ func equip(command playerCommand) (reply string) {
 	return
 }
 
-func use(_ playerCommand) (reply string) {
+func use(command playerCommand) (reply string) {
+	usedItem := command.arg1
+	object := command.arg2
+
+	foundItem := item{"", false, false}
+
+SearchItemLoop:
+	for _, container := range player.equipped {
+		if container.name != "" {
+			for _, val := range container.containing {
+				if val.name == usedItem {
+					foundItem = val
+					break SearchItemLoop
+				}
+			}
+		}
+	}
+
+	if foundItem.name == "" {
+		return "нет предмета в инвентаре - " + usedItem
+	}
+
+	if object != "дверь" {
+		return "не к чему применить"
+	}
+
+	for idx, door := range doors {
+		if door.from.name == player.place.name {
+			doors[idx].locked = false
+			return "дверь открыта"
+		}
+	}
 
 	return
 }

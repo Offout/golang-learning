@@ -51,9 +51,17 @@ type playerCommand struct {
 	arg2   string
 }
 
+type door struct {
+	from   *place
+	to     *place
+	locked bool
+}
+
 var player playerStruct
 
 var actions map[string]actionFunction
+
+var doors []door
 
 func initGame() {
 	itemBackpack := item{itemNameBackpack, true, true}
@@ -83,6 +91,10 @@ func initGame() {
 		actionNameTake:       take,
 		actionNameUse:        use,
 	}
+
+	corridorOutsideDoor := door{&placeCorridor, &placeOutside, true}
+
+	doors = []door{corridorOutsideDoor}
 }
 
 func handleCommand(command string) string {
@@ -112,9 +124,7 @@ func parseCommand(inputString string) (parsedCommand playerCommand) {
 	}
 	return
 }
+
 func main() {
 	initGame()
-	println(handleCommand("осмотреться"))
-	println(handleCommand("идти коридор"))
-	println(handleCommand("идти комната"))
 }
